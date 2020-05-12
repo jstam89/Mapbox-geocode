@@ -1,0 +1,8 @@
+{
+  "name": "mapbox",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "jsonp": "^0.2.1"
+  }
+}

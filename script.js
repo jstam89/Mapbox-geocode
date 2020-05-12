@@ -1,5 +1,6 @@
 import "https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.js"
 import "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"
+import jsonp from "jsonp"
 
 window.addEventListener('DOMContentLoaded', (event) => {
 
@@ -14,34 +15,27 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
     map.on('load', () => {
 
-        fetch('/reports.json')
-            .then((response) => {
-                if (response.status !== 200) {
-                    console.log('Looks like there was a problem. Status Code: ' + response.status);
-                    return
-                }
-                response.json()
-                    .then(data => {
-                        const point = data.map(key => key.point.coordinates)
+        jsonp("https://api.routeradar.nl/api/v1/reports?query_type=overview", (error, data) => {
+            if (error) {
+                console.log('Looks like there was a problem. Status Code: ' + error);
+            }
+            let point = data.map(key => key.point.coordinates)
 
-                        point.forEach(point => {
-                            let el = document.createElement('div');
-                            el.className = 'marker';
+            point.forEach(point => {
+                let el = document.createElement('div');
+                el.className = 'marker';
 
-                            new mapboxgl.Marker(el)
-                                .setLngLat(point)
-                                .addTo(map);
-                        })
-                    }).catch((error) => {
-                    console.log(error)
+                new mapboxgl.Marker(el)
+                    .setLngLat(point)
+                    .addTo(map);
+            });
+
+            map.addControl(
+                new MapboxGeocoder({
+                    accessToken: mapboxgl.accessToken,
+                    mapboxgl: mapboxgl
                 })
-            })
-
-        map.addControl(
-            new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl
-            })
-        );
-    })
+            );
+        })
+    });
 });
