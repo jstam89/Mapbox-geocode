@@ -14,9 +14,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
     map.on('load', () => {
 
-        fetch('https://api.routeradar.nl/api/v1/reports?query_type=overview',{
-            mode: "no-cors"
+        navigator.geolocation.getCurrentPosition(position => {
+            let el = document.createElement('div');
+            el.className = 'location';
+
+            new mapboxgl.Marker(el)
+                .setLngLat({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                })
+                .addTo(map);
         })
+
+        fetch('/reports.json')
             .then((response) => {
                 if (response.status !== 200) {
                     console.log('Looks like there was a problem. Status Code: ' + response.status);
@@ -38,5 +48,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     console.log(error)
                 })
             })
+        map.addControl(
+            new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl
+            }),
+        );
     });
 });
